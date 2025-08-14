@@ -1,0 +1,39 @@
+name: Terraform Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Carpeta de Terraform a desplegar (network, ec2, s3)"
+        required: true
+        default: "network"
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.5
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ${{ github.event.inputs.target }}
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+        working-directory: ${{ github.event.inputs.target }}
+
+      - name: Wait for approval
+        uses: hmarr/await-approval-action@v1
+        with:
+          approvers: "ezequielbugnon"
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
+        working-directory: ${{ github.event.inputs.target }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
