@@ -10,6 +10,6 @@ resource "aws_s3_bucket" "demo" {
   bucket = "demo-bucket-${random_id.suffix.hex}"
 
   tags = {
-    Name = "demo-bucket"
+    Name = "demo-bucket-dardo"
   }
 }
